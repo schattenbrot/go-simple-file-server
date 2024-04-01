@@ -10,10 +10,13 @@ import (
 	"github.com/schattenbrot/go-simple-upload-server/internal/config"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/app"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/files"
+	"github.com/schattenbrot/go-simple-upload-server/packages/explerror"
+	"github.com/schattenbrot/go-simple-upload-server/packages/responder"
 )
 
 func main() {
 	config.NewConfig()
+	explerror.Setup(nil, responder.Send)
 
 	// Check if the files-directory exists
 	directory := "./data/files"

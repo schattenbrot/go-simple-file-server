@@ -3,18 +3,23 @@ package explerror
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 var logger *log.Logger
-var send func(w http.ResponseWriter, logger *log.Logger, status int, data interface{}) error
+var send func(w http.ResponseWriter, status int, data interface{}) error
 
 type jsonError struct {
 	StatusCode int    `json:"statusCode"`
 	Message    string `json:"message"`
 }
 
-func Setup(log *log.Logger, sendF func(w http.ResponseWriter, logger *log.Logger, status int, data interface{}) error) {
-	logger = log
+func Setup(loggerRef *log.Logger, sendF func(w http.ResponseWriter, status int, data interface{}) error) {
+	if loggerRef == nil {
+		logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	} else {
+		logger = loggerRef
+	}
 	send = sendF
 }
 
@@ -27,7 +32,7 @@ func sendError(w http.ResponseWriter, statusCode int, err error) {
 	}
 
 	// sendError(w, statusCode, theError)
-	send(w, logger, statusCode, theError)
+	send(w, statusCode, theError)
 }
 
 func BadRequest(w http.ResponseWriter, err error) {

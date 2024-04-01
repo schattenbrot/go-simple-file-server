@@ -69,6 +69,10 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 
 	file, err := os.Open(filesDir)
 	if err != nil {
+		if os.IsNotExist(err) {
+			explerror.NotFound(w, errors.New("file not found"))
+			return
+		}
 		explerror.InternalServerError(w, err)
 		return
 	}
@@ -90,7 +94,7 @@ func getFiles(w http.ResponseWriter, r *http.Request) {
 		Filetype string `json:"filetype"`
 	}
 
-	var files []FileInfo
+	var files []FileInfo = []FileInfo{}
 
 	// Walk through the directory
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
