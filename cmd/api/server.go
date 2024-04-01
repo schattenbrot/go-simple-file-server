@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/schattenbrot/go-simple-upload-server/internal/config"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/app"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/files"
@@ -32,12 +33,14 @@ func main() {
 
 	r := chi.NewRouter()
 
+	r.Use(cors.Handler(cors.Options{}))
+
 	r.Mount("/", app.Routes())
 	r.Mount("/files", files.Routes())
 
-	fmt.Println("Runs")
+	fmt.Printf("Runs on port %d", config.Port)
 
-	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", config.Port), r); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r); err != nil {
 		fmt.Println(err.Error())
 	}
 }
