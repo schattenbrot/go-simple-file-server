@@ -1,13 +1,15 @@
 package files
 
-import "github.com/go-chi/chi/v5"
+import (
+	"github.com/go-chi/chi/v5"
+)
 
 func Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", uploadFile)
-	r.Get("/", getFiles)
-	r.Get("/{filename}", getFile)
+	r.With(hasReadWriteAccess).Post("/", uploadFile)
+	r.With(hasReadAccess).Get("/", getFiles)
+	r.With(hasReadAccess).Get("/{filename}", getFile)
 
 	return r
 }

@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/schattenbrot/go-simple-upload-server/internal/config"
 	"github.com/schattenbrot/go-simple-upload-server/packages/explerror"
 	"github.com/schattenbrot/go-simple-upload-server/packages/responder"
 )
@@ -26,12 +27,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := fmt.Sprintf("%d-%s", time.Now().Unix(), fileHeader.Filename)
-
-	fileType := filepath.Ext(fileHeader.Filename)
-	if fileType != ".jpg" && fileType != ".jpeg" && fileType != ".png" {
-		explerror.BadRequest(w, errors.New("wrong filetype"))
-		return
-	}
 
 	defer file.Close()
 	workDir, err := os.Getwd()
@@ -50,9 +45,9 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	io.Copy(out, file)
 
 	responder.Send(w, http.StatusCreated, struct {
-		Filename string `json:"filename"`
+		Filepath string `json:"filepath"`
 	}{
-		Filename: filename,
+		Filepath: fmt.Sprintf("%s:%d/api/v1/files/%s", config.Domain, config.Port, filename),
 	})
 }
 

@@ -13,3 +13,11 @@ func status(w http.ResponseWriter, r *http.Request) {
 		Message: "running",
 	})
 }
+
+func ping(w http.ResponseWriter, r *http.Request) {
+	responder.Send(w, http.StatusOK, struct {
+		Message string `json:"message"`
+	}{
+		Message: "successful",
+	})
+}

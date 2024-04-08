@@ -7,6 +7,7 @@ func Routes() chi.Router {
 
 	r.Get("/", status)
 	r.Get("/status", status)
+	r.Get("/ping", ping)
 
 	return r
 }

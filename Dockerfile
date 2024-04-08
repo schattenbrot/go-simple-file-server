@@ -14,11 +14,9 @@ RUN CGO_ENABLED=0 go build -v -o api ./cmd/api
 # 
 # Run app
 # 
-FROM golang:1.22.1
+FROM scratch
 
 WORKDIR /run
-
-ENV CORS false
 
 COPY --from=builder /go/src/api ./
 

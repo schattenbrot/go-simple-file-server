@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/schattenbrot/go-simple-upload-server/internal/config"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/app"
@@ -17,7 +18,7 @@ import (
 
 func main() {
 	config.NewConfig()
-	explerror.Setup(nil, responder.Send)
+	explerror.Setup(log.Default(), responder.Send)
 
 	// Check if the files-directory exists
 	directory := "./data/files"
@@ -28,19 +29,26 @@ func main() {
 			log.Fatal("Error creating directory:", err)
 			return
 		}
-		fmt.Println("Directory created successfully:", directory)
+		fmt.Println("File Directory created successfully")
 	}
 
 	r := chi.NewRouter()
 
-	r.Use(cors.Handler(cors.Options{}))
+	r.Use(middleware.Logger)
 
-	r.Mount("/", app.Routes())
-	r.Mount("/files", files.Routes())
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:     config.Cors.AllowedOrigins,
+		OptionsPassthrough: true,
+	}))
 
-	fmt.Printf("Runs on port %d", config.Port)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Mount("/", app.Routes())
+		r.Mount("/files", files.Routes())
+	})
+
+	log.Println("The API runs on port:", config.Port)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r); err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 	}
 }
