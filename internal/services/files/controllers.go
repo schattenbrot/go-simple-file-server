@@ -16,6 +16,23 @@ import (
 	"github.com/schattenbrot/go-simple-upload-server/packages/responder"
 )
 
+// uploadResponse represents the response structure for file upload.
+// swagger:model
+type uploadResponse struct {
+	// Filepath represents the URL where the uploaded file can be accessed.
+	// Example: http://example.com/api/v1/files/filename.png
+	Filepath string `json:"filepath"`
+}
+
+// @Summary Upload a file
+// @Description Uploads a file
+// @Tags files
+// @Accept mpfd
+// @Produce json
+// @Success 201 {object} uploadResponse
+// @Failure 400 {object} explerror.ErrorResponse
+// @Router /files/ [post]
+// @Security BearerAuth
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	r.ParseForm()
@@ -44,13 +61,28 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	defer out.Close()
 	io.Copy(out, file)
 
-	responder.Send(w, http.StatusCreated, struct {
-		Filepath string `json:"filepath"`
-	}{
+	responder.Send(w, http.StatusCreated, uploadResponse{
 		Filepath: fmt.Sprintf("%s:%d/api/v1/files/%s", config.Domain, config.Port, filename),
 	})
 }
 
+// FileResponse represents a file resource.
+// swagger:model
+type FileResponse struct {
+	// Content represents the content of the file.
+	Content []byte `json:"contentAsBlob"`
+}
+
+// @Summary Get a file
+// @Description Retrieves a file by filename
+// @Tags files
+// @Param filename path string true "File name"
+// @Produce octet-stream
+// @Success 200 {object} FileResponse "File content"
+// @Failure 400 {object} explerror.ErrorResponse
+// @Failure 404 {object} explerror.ErrorResponse
+// @Router /files/{filename} [get]
+// @Security BearerAuth
 func getFile(w http.ResponseWriter, r *http.Request) {
 	filename := chi.URLParam(r, "filename")
 
@@ -76,6 +108,24 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 	file.WriteTo(w)
 }
 
+// FileInfo represents the response structure for a single file info.
+// swagger:model
+type FileInfo struct {
+	// Filename represents the file's name.
+	Filename string `json:"filename"`
+	// Filetype represents the file's type.
+	Filetype string `json:"filetype"`
+}
+
+// @Summary Get files
+// @Description Retrieves a list of available files
+// @Tags files
+// @Produce json
+// @Success 200 {array} FileInfo "List of files"
+// @Failure 404 {object} explerror.ErrorResponse
+// @Failure 500 {object} explerror.ErrorResponse
+// @Router /files/ [get]
+// @Security BearerAuth
 func getFiles(w http.ResponseWriter, r *http.Request) {
 	workDir, err := os.Getwd()
 	if err != nil {
@@ -83,11 +133,6 @@ func getFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dir := filepath.Join(workDir, "data", "files")
-
-	type FileInfo struct {
-		Filename string `json:"filename"`
-		Filetype string `json:"filetype"`
-	}
 
 	var files []FileInfo = []FileInfo{}
 
@@ -97,7 +142,7 @@ func getFiles(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 		// Check if the file is not a directory and has the desired extension
-		if !info.IsDir() && (filepath.Ext(info.Name()) == ".png" || filepath.Ext(info.Name()) == ".jpeg" || filepath.Ext(info.Name()) == ".jpg") {
+		if !info.IsDir() {
 			files = append(files, FileInfo{
 				Filename: info.Name(),
 				Filetype: filepath.Ext(info.Name()),

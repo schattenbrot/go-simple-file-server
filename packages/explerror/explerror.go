@@ -8,9 +8,16 @@ import (
 var logger *log.Logger
 var send func(w http.ResponseWriter, status int, data interface{}) error
 
-type jsonError struct {
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
+// ErrorResponse represents the structure for the error response.
+// swagger:model
+type ErrorResponse struct {
+	// StatusCode represents the HTTP status code of the error.
+	// example: 400
+	StatusCode int `json:"statusCode"`
+
+	// Message represents the error message.
+	// example: Bad request
+	Message string `json:"message"`
 }
 
 func Setup(loggerRef *log.Logger, sendF func(w http.ResponseWriter, status int, data interface{}) error) {
@@ -21,7 +28,7 @@ func Setup(loggerRef *log.Logger, sendF func(w http.ResponseWriter, status int, 
 func sendError(w http.ResponseWriter, statusCode int, err error) {
 	logger.Printf("%d: %s", statusCode, err.Error())
 
-	theError := &jsonError{
+	theError := &ErrorResponse{
 		StatusCode: statusCode,
 		Message:    err.Error(),
 	}

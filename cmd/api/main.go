@@ -9,13 +9,23 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	_ "github.com/schattenbrot/go-simple-upload-server/docs"
 	"github.com/schattenbrot/go-simple-upload-server/internal/config"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/app"
 	"github.com/schattenbrot/go-simple-upload-server/internal/services/files"
 	"github.com/schattenbrot/go-simple-upload-server/packages/explerror"
 	"github.com/schattenbrot/go-simple-upload-server/packages/responder"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title File API
+// @version 1.0
+// @description This is a simple file management API.
+// @host localhost:8080
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	config.NewConfig()
 	explerror.Setup(log.Default(), responder.Send)
@@ -40,6 +50,12 @@ func main() {
 		AllowedOrigins:     config.Cors.AllowedOrigins,
 		OptionsPassthrough: true,
 	}))
+
+	// Redirect /docs to /docs/index.html
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/docs/index.html", http.StatusFound)
+	})
+	r.Get("/docs/*", httpSwagger.WrapHandler)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/", app.Routes())
