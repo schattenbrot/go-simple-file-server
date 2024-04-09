@@ -8,6 +8,7 @@ import (
 	"github.com/thanhpk/randstr"
 )
 
+var Env string
 var Domain string
 var Port int
 var Cors struct {
@@ -20,6 +21,7 @@ var Tokens struct {
 }
 
 func NewConfig() {
+	flag.StringVar(&Env, "env", "dev", "the server environment")
 	flag.StringVar(&Domain, "domain", "http://localhost", "the server domain")
 	flag.IntVar(&Port, "port", 8080, "the server port")
 	flag.BoolVar(&Cors.IsEnabled, "cors", false, "the server cors")

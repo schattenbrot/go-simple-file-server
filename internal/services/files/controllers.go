@@ -61,8 +61,12 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	defer out.Close()
 	io.Copy(out, file)
 
+	domain := config.Domain
+	if config.Env != "prod" {
+		domain = fmt.Sprintf("%s:%d", domain, config.Port)
+	}
 	responder.Send(w, http.StatusCreated, uploadResponse{
-		Filepath: fmt.Sprintf("%s:%d/api/v1/files/%s", config.Domain, config.Port, filename),
+		Filepath: fmt.Sprintf("%s/api/v1/files/%s", domain, filename),
 	})
 }
 

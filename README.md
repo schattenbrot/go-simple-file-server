@@ -67,3 +67,15 @@ Currently there only exists `version` `v1`
 │       └── responder.go
 └── README.md
 ```
+
+## Config
+
+```go
+	flag.StringVar(&Env, "env", "dev", "the server environment")
+	flag.StringVar(&Domain, "domain", "http://localhost", "the server domain")
+	flag.IntVar(&Port, "port", 8080, "the server port")
+	flag.BoolVar(&Cors.IsEnabled, "cors", false, "the server cors")
+	allowedOrigins := flag.String("allowed_origins", "*", "the server allowed cors origins (split the origins with ,)")
+	readTokens := flag.String("write_tokens", "", "the server's required read tokens (split tokens with ,)")
+	readWriteTokens := flag.String("read_write_tokens", "", "the server's required read-write tokens (split tokens with ,)")
+```
