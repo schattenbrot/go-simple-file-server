@@ -1,0 +1,172 @@
+basePath: /api/v1
+definitions:
+  app.StatusResponse:
+    properties:
+      message:
+        description: Message represents the server status.
+        type: string
+    type: object
+  explerror.ErrorResponse:
+    properties:
+      message:
+        description: |-
+          Message represents the error message.
+          example: Bad request
+        type: string
+      statusCode:
+        description: |-
+          StatusCode represents the HTTP status code of the error.
+          example: 400
+        type: integer
+    type: object
+  files.FileInfo:
+    properties:
+      filename:
+        description: Filename represents the file's name.
+        type: string
+      filetype:
+        description: Filetype represents the file's type.
+        type: string
+    type: object
+  files.FileResponse:
+    properties:
+      contentAsBlob:
+        description: Content represents the content of the file.
+        items:
+          type: integer
+        type: array
+    type: object
+  files.uploadResponse:
+    properties:
+      filepath:
+        description: |-
+          Filepath represents the URL where the uploaded file can be accessed.
+          Example: http://example.com/api/v1/files/filename.png
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a simple file management API.
+  title: File API
+  version: "1.0"
+paths:
+  /app:
+    get:
+      description: Retrieves the running server's status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.StatusResponse'
+      summary: Get server status
+      tags:
+      - app
+  /app/ping:
+    get:
+      description: Retrieves a success message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.StatusResponse'
+      summary: Ping the server
+      tags:
+      - app
+  /app/status:
+    get:
+      description: Retrieves the running server's status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/app.StatusResponse'
+      summary: Get server status
+      tags:
+      - app
+  /files/:
+    get:
+      description: Retrieves a list of available files
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of files
+          schema:
+            items:
+              $ref: '#/definitions/files.FileInfo'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/explerror.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/explerror.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get files
+      tags:
+      - files
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/files.uploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/explerror.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload a file
+      tags:
+      - files
+  /files/{filename}:
+    get:
+      description: Retrieves a file by filename
+      parameters:
+      - description: File name
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File content
+          schema:
+            $ref: '#/definitions/files.FileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/explerror.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/explerror.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a file
+      tags:
+      - files
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

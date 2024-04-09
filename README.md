@@ -1,4 +1,4 @@
-# Simple File Server in Go
+# Go Simple File Server
 
 This is a very simple fileserver written in Go.
 
@@ -39,7 +39,7 @@ Currently there only exists `version` `v1`
 │       └── main.go
 ├── data
 │   └── files
-│       └── file-eg-image.png
+│       └── example-image.png
 ├── Dockerfile
 ├── docs
 │   ├── docs.go
